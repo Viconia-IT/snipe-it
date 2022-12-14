@@ -182,7 +182,6 @@ class AssetMaintenancesController extends Controller
     public function update(Request $request, $assetMaintenanceId = null)
     {
         $this->authorize('update', Asset::class);
-        
         // Check if the asset maintenance exists
         $assetMaintenance = AssetMaintenance::findOrFail($assetMaintenanceId);
 

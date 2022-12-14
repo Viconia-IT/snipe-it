@@ -184,7 +184,6 @@ class AssetMaintenancesController extends Controller
                                     '' => 'Select an improvement type',
                                 ] + AssetMaintenance::getImprovementOptions();
 
-
         // Get Supplier List
         // Render the view
         return view('asset_maintenances/edit')
@@ -193,8 +192,6 @@ class AssetMaintenancesController extends Controller
                    ->with('articleTypes', array_merge([''], AssetMaintenance::getArticleTypes())) /* VICONIA LINE */ 
                    ->with('item', $assetMaintenance);
     }
-
-
 
     /**
      *  Validates and stores an update to an asset maintenance
