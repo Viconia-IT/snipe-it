@@ -82,6 +82,7 @@ class AssetMaintenancesController extends Controller
         return view('asset_maintenances/edit')
                    ->with('asset', $asset)
                    ->with('assetMaintenanceType', $assetMaintenanceType)
+                   ->with('articleTypes', array_merge([''], AssetMaintenance::getArticleTypes())) /* VICONIA LINE */   
                    ->with('item', new AssetMaintenance);
     }
 
@@ -103,6 +104,11 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->is_warranty = $request->input('is_warranty');
         $assetMaintenance->cost = Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = $request->input('notes');
+/* VICONIA START */
+        $assetMaintenance->invoice_id = $request->input('invoice_id');   
+        $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles')); 
+/* VICONIA END */
+
         $asset = Asset::find($request->input('asset_id'));
 
         if ((! Company::isCurrentUserHasAccess($asset)) && ($asset != null)) {
@@ -178,13 +184,17 @@ class AssetMaintenancesController extends Controller
                                     '' => 'Select an improvement type',
                                 ] + AssetMaintenance::getImprovementOptions();
 
+
         // Get Supplier List
         // Render the view
         return view('asset_maintenances/edit')
                    ->with('selectedAsset', null)
                    ->with('assetMaintenanceType', $assetMaintenanceType)
+                   ->with('articleTypes', array_merge([''], AssetMaintenance::getArticleTypes())) /* VICONIA LINE */ 
                    ->with('item', $assetMaintenance);
     }
+
+
 
     /**
      *  Validates and stores an update to an asset maintenance
@@ -213,6 +223,10 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->is_warranty = $request->input('is_warranty');
         $assetMaintenance->cost =  Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = $request->input('notes');
+/* VICONIA START */
+        $assetMaintenance->invoice_id = $request->input('invoice_id');   
+        $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles')); 
+/* VICONIA END */
 
         $asset = Asset::find(request('asset_id'));
 

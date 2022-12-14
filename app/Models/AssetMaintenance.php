@@ -35,6 +35,10 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'completion_date'        => 'nullable|date',
         'notes'                  => 'string|nullable',
         'cost'                   => 'numeric|nullable',
+/* VICONIA START */   
+        'invoice_id'             => 'string|nullable',
+        'articles'               => 'string|nullable', 
+/* VICONIA END */  
     ];
 
     use Searchable;
@@ -44,7 +48,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
      *
      * @var array
      */
-    protected $searchableAttributes = ['title', 'notes', 'asset_maintenance_type', 'cost', 'start_date', 'completion_date'];
+    protected $searchableAttributes = ['title', 'notes', 'asset_maintenance_type', 'cost', 'start_date', 'completion_date', 'invoice_id', 'articles']; /* VICONIA ARGUMENTS 'invoice_id', 'articles' */  
 
     /**
      * The relations and their attributes that should be included when searching the model.
@@ -81,6 +85,38 @@ class AssetMaintenance extends Model implements ICompanyableChild
             trans('admin/asset_maintenances/general.configuration_change')     => trans('admin/asset_maintenances/general.configuration_change'),
         ];
     }
+
+/* VICONIA START */    
+    /**
+     * getArticleTypes
+     *
+     * @return array
+     * @version v1.0
+     */
+    public static function getArticleTypes()
+    {
+        return [
+            "vrep001 - Workhours",
+            "vrep002 - Items",
+            "vrep003 - Parts",
+        ];
+    }
+
+    public static function parseArticles($articles)
+    {
+        if ($articles == null) return null;
+        
+        $articleTypes = AssetMaintenance::getArticleTypes();
+        $cleanArray = [];
+        foreach ($articles as $value)
+        {
+            if (in_array($value, $articleTypes)) {
+                array_push($cleanArray, $value);
+            }
+        }
+        return json_encode($cleanArray);
+    }
+/* VICONIA END */ 
 
     public function setIsWarrantyAttribute($value)
     {

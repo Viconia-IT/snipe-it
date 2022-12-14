@@ -54,6 +54,11 @@ class AssetMaintenancesController extends Controller
             $maintenances->where('asset_maintenance_type', '=', $request->input('asset_maintenance_type'));
         }
 
+/* VICONIA START */
+        if ($request->filled('articles')) {
+            $maintenances->where('articles', '=', $request->input('articles'));
+        }
+/* VICONIA END */
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -74,7 +79,11 @@ class AssetMaintenancesController extends Controller
                                 'asset_tag',
                                 'asset_name',
                                 'user_id',
-                                'supplier'
+                                'supplier',
+/* VICONIA START */
+                                'invoice_id',
+                                'articles'
+ /* VICONIA END */
                             ];
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
@@ -123,6 +132,10 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->is_warranty = $request->input('is_warranty');
         $assetMaintenance->cost =  Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = e($request->input('notes'));
+/* VICONIA START */
+        $assetMaintenance->invoice_id = $request->input('invoice_id');   
+        $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles')); 
+/* VICONIA END */
         $asset = Asset::find(e($request->input('asset_id')));
 
         if (! Company::isCurrentUserHasAccess($asset)) {
@@ -169,6 +182,7 @@ class AssetMaintenancesController extends Controller
     public function update(Request $request, $assetMaintenanceId = null)
     {
         $this->authorize('update', Asset::class);
+        
         // Check if the asset maintenance exists
         $assetMaintenance = AssetMaintenance::findOrFail($assetMaintenanceId);
 
@@ -176,23 +190,35 @@ class AssetMaintenancesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot edit a maintenance for that asset'));
         }
 
-        $assetMaintenance->supplier_id = e($request->input('supplier_id'));
-        $assetMaintenance->is_warranty = e($request->input('is_warranty'));
-        $assetMaintenance->cost =  Helper::ParseCurrency($request->input('cost'));
-        $assetMaintenance->notes = e($request->input('notes'));
+/* VICONIA START */
 
-        $asset = Asset::find(request('asset_id'));
+        // If we want to change asset_id, make sure it exists and that we have permission for the new asset
+        if ($request->exists('asset_id'))
+        {
+            $asset = Asset::find(request('asset_id'));
 
-        if (! Company::isCurrentUserHasAccess($asset)) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot edit a maintenance for that asset'));
-        }
+            if (! Company::isCurrentUserHasAccess($asset)) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot edit a maintenance for that asset'));
+            }
 
-        // Save the asset maintenance data
-        $assetMaintenance->asset_id = $request->input('asset_id');
-        $assetMaintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
-        $assetMaintenance->title = $request->input('title');
-        $assetMaintenance->start_date = $request->input('start_date');
-        $assetMaintenance->completion_date = $request->input('completion_date');
+            $assetMaintenance->asset_id = $asset;
+        }  
+
+        // Override the asset maintenance data with the incomming parameters
+        if ($request->exists('supplier_id'))        $assetMaintenance->supplier_id = $request->Input('supplier_id');
+        if ($request->exists('asset_maintenance_type')) $assetMaintenance->asset_maintenance_type = $request->Input('asset_maintenance_type');
+
+        if ($request->exists('title'))              $assetMaintenance->title = $request->Input('title');
+        if ($request->exists('start_date'))         $assetMaintenance->start_date = $request->Input('start_date');
+        if ($request->exists('completion_date'))    $assetMaintenance->completion_date = $request->Input('completion_date');
+        if ($request->exists('is_warranty'))        $assetMaintenance->is_warranty = $request->Input('is_warranty');
+
+        if ($request->exists('cost'))               $assetMaintenance->cost = Helper::ParseCurrency($request->input('cost'));
+        if ($request->exists('notes'))              $assetMaintenance->notes = $request->Input('notes');
+        if ($request->exists('invoice_id'))         $assetMaintenance->invoice_id = $request->Input('invoice_id');
+        if ($request->exists('articles'))           $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles'));
+/* VICONIA END */
+
 
         if (($assetMaintenance->completion_date == null)
         ) {

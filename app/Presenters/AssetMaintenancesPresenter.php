@@ -101,6 +101,18 @@ class AssetMaintenancesPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('admin/asset_maintenances/form.cost'),
                 'class' => 'text-right',
+/* VICONIA START */
+            ], [
+                'field' => 'invoice_id',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => 'Invoice Id',
+            ], [
+                'field' => 'articles',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => 'Articles',
+/* VICONIA END */
             ], [
                 'field' => 'user_id',
                 'searchable' => true,

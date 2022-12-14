@@ -97,6 +97,26 @@ use Carbon\Carbon;
         </div>
       </div>
       <!-- 5th Row End -->
+
+<!--   VICONIA START   -->
+      <!-- 6th Row Begin -->
+      <div class="row">
+        <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
+          <strong>Invoice Id: </strong>
+          {{ $assetMaintenance->invoice_id }}
+        </div>
+      </div>
+      <!-- 6th Row End -->
+      <!-- 7th Row Begin -->
+      <div class="row">
+        <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
+          <strong>Articles: </strong>
+          {{ Helper::formatArticlesOutput($assetMaintenance->articles) }}
+        </div>
+      </div>
+      <!-- 7th Row End -->
+<!--   VICONIA END   -->
+
     </div> <!-- col-md-9 bio end -->
   </div> <!-- row profile end -->
 </div> <!-- user-profile end -->

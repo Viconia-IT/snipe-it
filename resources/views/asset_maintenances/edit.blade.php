@@ -121,6 +121,32 @@
             {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>
+        
+<!--   VICONIA START   -->
+        <!-- Invoice Id -->
+        <div class="form-group {{ $errors->has('invoice_id') ? ' has-error' : '' }}">
+          <label for="invoice_id" class="col-md-3 control-label">
+            Invoice Id
+          </label>
+          <div class="col-md-7{{  (Helper::checkIfRequired($item, 'invoice_id')) ? ' required' : '' }}">
+            <input class="form-control" type="text" name="invoice_id" id="invoice_id" value="{{ old('invoice_id', $item->invoice_id) }}" />
+            {!! $errors->first('invoice_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+          </div>
+        </div>
+
+        <!-- Articles + button -->
+        <div class="form-group {{ $errors->has('articles') ? ' has-error' : '' }}">
+            <label for="articles" class="col-md-3 control-label">Articles</label>
+            <div class="col-md-2 col-sm-12">
+                <button class="add_field_button btn btn-default btn-sm">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="input_fields_wrap"></div>
+<!--   VICONIA END   -->
+
+
       </div> <!-- .box-body -->
 
       <div class="box-footer text-right">
@@ -132,3 +158,80 @@
 </div>
 
 @stop
+
+<!--   VICONIA START   -->
+@section('moar_scripts')
+<script>
+    
+    // Add another asset tag + serial combination if the plus sign is clicked
+    $(document).ready(function() {
+
+        var wrapper         = $(".input_fields_wrap"); //Fields wrapper
+        var add_button      = $(".add_field_button"); //Add button ID
+        var articleIndex    = 0; //Index in the array
+        var x               = 1; //initial text box count
+        var articleTypes    = <?php echo json_encode($articleTypes); ?>;
+        
+
+        // Those we got from the server on page load
+        // If we edit an existing maintenance there may already exist some articles
+        function populateExistingArticles()
+        {
+            var articles = <?php echo isset($item->articles) ? $item->articles : json_encode([]); ?>;
+            articles.forEach(element => {
+                addArticleField(element);
+            });
+
+        }
+
+        function addArticleField(defaultValue)
+        {
+            x++; //text box increment
+
+            var box_html = '';
+            box_html += '<span class="fields_wrapper">';
+            box_html += '<div class="form-group">';
+            box_html += '<label for="articles[' + articleIndex + ']" class="col-md-3 control-label">#'+ articleIndex +'</label>'
+            box_html += '<div class="col-md-7 col-sm-12 required">';
+            
+            // Use a normal select list to choose
+            box_html += '<select type="text" class="myselect form-control" name="articles[' + articleIndex + ']">';
+            articleTypes.forEach(element => {
+                var selected = (element === defaultValue) ? "selected" : "";
+                box_html += '<option class="myselect form-control" style="min-width:350px" "aria-label"="ArticleTypes" value="' + element + '" ' + selected +' >' + element + '</option>';
+            });
+            box_html += '</select>';
+
+            box_html += '</div>';
+            box_html += '<div class="col-md-2 col-sm-12">';
+            box_html += '<a href="#" class="remove_field btn btn-default btn-sm"><i class="fas fa-minus"></i></a>';
+            box_html += '</div>';
+            box_html += '</div>';
+            box_html += '</div>';
+            box_html += '</span>';
+
+            $(wrapper).append(box_html);
+            $('.myselect').select2();   //Initialize Select2 Elements
+
+            articleIndex++;
+        }
+
+        $(add_button).click(function(e){ //on add input button click
+            e.preventDefault();
+            addArticleField("defaultValue");
+        });
+        
+        $(wrapper).on("click",".remove_field", function(e){ //user clicks on remove text
+            e.preventDefault();
+            $(this).parent('div').parent('div').parent('span').remove();
+            x--;
+        });
+
+
+        populateExistingArticles();
+    });
+
+</script>
+@stop
+
+<!--   VICONIA END   -->

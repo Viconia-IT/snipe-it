@@ -55,6 +55,30 @@ class Helper
     }
 
 
+// VICONIA START
+    /**
+     *
+     * @author [Carl Pettersson] [carl.pettersson@viconia.se]
+     * @return string
+     */
+    public static function formatArticlesOutput($articles)
+    {
+        if ($articles == null) return "";
+        $outString = "";
+        $array = json_decode($articles);
+        $count = count($array);
+        $i = 0;
+        foreach ($array as $value)
+        {
+            $outString .= $value;
+            if ($i < $count - 1) $outString .= ", ";
+            $i++;
+        }
+        return $outString;
+    }
+// VICONIA END
+
+
     /**
      * Static colors for pie charts.
      *

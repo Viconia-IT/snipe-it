@@ -48,6 +48,7 @@
                     <th data-searchable="true" data-sortable="true" data-field="cost" class="text-right" data-footer-formatter="sumFormatter">{{ trans('admin/asset_maintenances/form.cost') }}</th>
                     <th data-searchable="true" data-sortable="true" data-field="user_id" data-formatter="usersLinkObjFormatter">{{ trans('general.admin') }}</th>
                     <th data-searchable="true" data-sortable="true" data-field="notes" data-visible="false">{{ trans('admin/asset_maintenances/form.notes') }}</th>
+                    <th data-searchable="true" data-sortable="true" data-field="articles" data-visible="false">Articles</th> <!--  VICONIA LINE  -->
                 </tr>
                 </thead>
             </table>
