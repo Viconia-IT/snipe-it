@@ -25,7 +25,8 @@ These are the edited files, you can find the changes by searching for VICONIA:
 
 ### Updating to the latest Snipe-It version
 
-To update the project to the latest snipe version just click "Sync fork" then "Update" here on Github.
+To update the project you first need to sync this fork and merge with the Snipe-it master branch. To do that click "Sync fork" then "Update" here on Github.
+In your project folder on the server you can then run "php upgrade.php" to upgrade to the latest version.
 
 
 ![Build Status](https://app.chipperci.com/projects/0e5f8979-31eb-4ee6-9abf-050b76ab0383/status/master) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/snipe-it/localized.svg)](https://crowdin.com/project/snipe-it) [![Docker Pulls](https://img.shields.io/docker/pulls/snipe/snipe-it.svg)](https://hub.docker.com/r/snipe/snipe-it/) [![Twitter Follow](https://img.shields.io/twitter/follow/snipeitapp.svg?style=social)](https://twitter.com/snipeitapp)  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/553ce52037fc43ea99149785afcfe641)](https://www.codacy.com/app/snipe/snipe-it?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snipe/snipe-it&amp;utm_campaign=Badge_Grade)
