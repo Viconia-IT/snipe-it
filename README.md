@@ -21,8 +21,9 @@ PUT /api/v1/maintenances/{id}
 To update the project you need to sync this fork with the original Snipe-it master branch then update the project on the server.
 - Click "Sync fork" then "Update" here on Github.
 - Run "php upgrade.php" command in the project folder to upgrade to the latest version.
+- For some reason the API keys becomes invalid after an update, so you need to create new ones
 
-(Note: If you cloned the project using the original git branch from Snipe-IT you first need to change the Url to this branch using the command "git remote set-url origin https://github.com/Viconia-IT/snipe-it.git" in the project folder)
+Note: If you cloned the project using the original git branch from Snipe-IT you first need to change the Url to this branch using the command "git remote set-url origin https://github.com/Viconia-IT/snipe-it.git" in the project folder.
 
 
 ### Fresh installation
