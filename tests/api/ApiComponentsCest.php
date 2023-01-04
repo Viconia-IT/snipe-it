@@ -54,6 +54,7 @@ class ApiComponentsCest
             'model_number' => $temp_component->model_number,
             'name' => $temp_component->name,
             'order_number' => $temp_component->order_number,
+            'article_number' => $temp_component->article_number, // VICONIA LINE
             'purchase_cost' => $temp_component->purchase_cost,
             'purchase_date' => $temp_component->purchase_date,
             'qty' => $temp_component->qty,
@@ -95,6 +96,7 @@ class ApiComponentsCest
             'min_amt' => $temp_component->min_amt,
             'name' => $temp_component->name,
             'order_number' => $temp_component->order_number,
+            'article_number' => $temp_component->article_number, // VICONIA LINE
             'purchase_cost' => $temp_component->purchase_cost,
             'purchase_date' => $temp_component->purchase_date,
             'qty' => $temp_component->qty,

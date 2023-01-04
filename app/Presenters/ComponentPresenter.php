@@ -88,6 +88,14 @@ class ComponentPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('general.order_number'),
                 'visible' => true,
+// VICONIA START 
+            ], [
+                'field' => 'article_number',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.article_number'),     
+                'visible' => true,
+// VICONIA END
             ], [
                 'field' => 'purchase_date',
                 'searchable' => true,

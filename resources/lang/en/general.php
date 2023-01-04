@@ -11,6 +11,7 @@ return [
     'admin'					=> 'Admin',
     'administrator'			=> 'Administrator',
     'add_seats'             => 'Added seats',
+    'age'                   => "Age",
     'all_assets'			=> 'All Assets',
     'all'       			=> 'All',
     'archived'              => 'Archived',
@@ -187,6 +188,7 @@ return [
     'no'  					=> 'No',
     'notes'  				=> 'Notes',
     'order_number'          => 'Order Number',
+    'article_number'        => 'Article Number', // VICONIA LINE
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Showing _MENU_ items',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',

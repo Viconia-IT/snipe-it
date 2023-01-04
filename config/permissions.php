@@ -106,6 +106,15 @@ return [
             'display'    => true,
         ],
 
+// VICONIA START
+        [
+            'permission' => 'assets.maintenance_articles',
+            'label'      => 'View and Modify Articles in Maintenances',
+            'note'       => '',
+            'display'    => true,
+        ],
+// VICONIA END
+
     ],
 
     'Accessories' => [

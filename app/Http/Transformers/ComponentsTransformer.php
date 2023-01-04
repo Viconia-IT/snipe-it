@@ -38,6 +38,7 @@ class ComponentsTransformer
                 'name' => e($component->category->name),
             ] : null,
             'order_number'  => e($component->order_number),
+            'article_number'  => e($component->article_number), // VICONIA LINE
             'purchase_date' =>  Helper::getFormattedDateObject($component->purchase_date, 'date'),
             'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
             'remaining'  => (int) $component->numRemaining(),

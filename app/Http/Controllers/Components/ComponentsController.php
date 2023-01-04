@@ -74,6 +74,7 @@ class ComponentsController extends Controller
         $component->location_id            = $request->input('location_id');
         $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
         $component->order_number           = $request->input('order_number', null);
+        $component->article_number         = $request->input('article_number', null); // VICONIA LINE
         $component->min_amt                = $request->input('min_amt', null);
         $component->serial                 = $request->input('serial', null);
         $component->purchase_date          = $request->input('purchase_date', null);
@@ -148,6 +149,7 @@ class ComponentsController extends Controller
         $component->location_id            = $request->input('location_id');
         $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
         $component->order_number           = $request->input('order_number');
+        $component->article_number         = $request->input('article_number'); // VICONIA LINE
         $component->min_amt                = $request->input('min_amt');
         $component->serial                 = $request->input('serial');
         $component->purchase_date          = $request->input('purchase_date');

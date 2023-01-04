@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Transformers\SelectlistTransformer; // VICONIA LINE
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Company;
 use App\Models\Component;
@@ -35,6 +36,7 @@ class ComponentsController extends Controller
                 'name',
                 'min_amt',
                 'order_number',
+                'article_number', // VICONIA LINE
                 'serial',
                 'purchase_date',
                 'purchase_cost',
@@ -324,5 +326,39 @@ class ComponentsController extends Controller
 
     
     }
+
+// VICONIA START
+    // Gets a paginated collection for the select2 menus
+    public function selectlist(Request $request)
+    {
+
+        $this->authorize('view.selectlists');
+
+        $components = Component::select([
+            'id',
+            'name',
+            'image',
+            'article_number',
+        ]);
+
+        if ($request->filled('search')) {
+            $components = $components->where('components.name', 'LIKE', '%'.$request->get('search').'%')
+                                     ->orWhere('components.article_number', 'LIKE', '%'.$request->get('search').'%')
+                                     ->orWhere('components.id', 'LIKE', '%'.$request->get('search').'%');
+        }
+
+        $components = $components->orderBy('article_number', 'ASC')->paginate(50);
+
+        // Loop through and set some custom properties for the transformer to use.
+        // This lets us have more flexibility in special cases like assets, where
+        // they may not have a ->name value but we want to display something anyway
+        foreach ($components as $component) {
+            $component->use_text = $component->article_number . " - " . $component->name . " (" . $component->id . ")";
+            $component->use_image = ($component->image) ? Storage::disk('public')->url('components/'.$component->image, $component->image) : null;
+        }
+
+        return (new SelectlistTransformer)->transformSelectlist($components);
+    }
+// VICONIA END
 
 }

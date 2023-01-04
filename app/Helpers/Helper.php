@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+use App\Models\AssetMaintenance; // VICONIA LINE
 use App\Models\Accessory;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -12,6 +13,7 @@ use App\Models\Statuslabel;
 use Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Image;
+use Carbon\Carbon;
 
 class Helper
 {
@@ -64,11 +66,14 @@ class Helper
     public static function formatArticlesOutput($articles)
     {
         if ($articles == null) return "";
+
+        $parsed = AssetMaintenance::parseArticles($articles);
+        $strings = AssetMaintenance::articleObjectsToStrings($parsed);
+
         $outString = "";
-        $array = json_decode($articles);
-        $count = count($array);
+        $count = count($strings);
         $i = 0;
-        foreach ($array as $value)
+        foreach ($strings as $value)
         {
             $outString .= $value;
             if ($i < $count - 1) $outString .= ", ";
@@ -1149,5 +1154,25 @@ class Helper
 
         return $settings;
         }
+    public static function AgeFormat($date) {
+        $year = Carbon::parse($date)
+            ->diff(now())->y;
+        $month = Carbon::parse($date)
+            ->diff(now())->m;
+        $days = Carbon::parse($date)
+            ->diff(now())->d;
+        $age='';
+        if ($year) {
+            $age .= $year.'y ';
+        }
+        if ($month) {
+            $age .= $month.'m ';
+        }
+        if ($days) {
+            $age .= $days.'d';
+        }
 
+        return $age;
+
+    }
 }

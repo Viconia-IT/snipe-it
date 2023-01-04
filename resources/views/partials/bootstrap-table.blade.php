@@ -625,6 +625,13 @@
         }
     }
 
+// VICONIA START
+    function articleNumberObjFilterFormatter(value, row) {
+        if (value) {
+            return '<a href="{{ url('/') }}/hardware/?article_number=' + row.article_number + '">' + row.article_number + '</a>';
+        }
+    }
+// VICCONIA END
 
    function imageFormatter(value, row) {
 

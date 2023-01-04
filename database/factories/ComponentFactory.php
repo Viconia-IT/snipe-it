@@ -38,6 +38,7 @@ class ComponentFactory extends Factory
             'serial'   => $this->faker->uuid,
             'qty' => $this->faker->numberBetween(3, 10),
             'order_number' => $this->faker->numberBetween(1000000, 50000000),
+            'article_number' => $this->faker->numberBetween(1000000, 50000000), // VICONIA LINE
             'purchase_date' => $this->faker->dateTime(),
             'purchase_cost' => $this->faker->randomFloat(2),
             'min_amt' => $this->faker->numberBetween($min = 1, $max = 2),

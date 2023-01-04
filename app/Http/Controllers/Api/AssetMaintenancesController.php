@@ -134,7 +134,7 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->notes = e($request->input('notes'));
 /* VICONIA START */
         $assetMaintenance->invoice_id = $request->input('invoice_id');   
-        $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles')); 
+        $assetMaintenance->articles = $request->input('articles'); 
 /* VICONIA END */
         $asset = Asset::find(e($request->input('asset_id')));
 
@@ -215,7 +215,7 @@ class AssetMaintenancesController extends Controller
         if ($request->exists('cost'))               $assetMaintenance->cost = Helper::ParseCurrency($request->input('cost'));
         if ($request->exists('notes'))              $assetMaintenance->notes = $request->Input('notes');
         if ($request->exists('invoice_id'))         $assetMaintenance->invoice_id = $request->Input('invoice_id');
-        if ($request->exists('articles'))           $assetMaintenance->articles = AssetMaintenance::parseArticles($request->input('articles'));
+        if ($request->exists('articles'))           $assetMaintenance->articles = $request->input('articles');
 /* VICONIA END */
 
 

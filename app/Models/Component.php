@@ -35,6 +35,7 @@ class Component extends SnipeModel
         'category_id'    => 'required|integer|exists:categories,id',
         'company_id'     => 'integer|nullable',
         'min_amt'        => 'integer|min:0|nullable',
+        'article_number' => 'max:30|nullable',    /* VICONIA LINE */  
         'purchase_date'  => 'date|nullable',
         'purchase_cost'  => 'numeric|nullable|gte:0',
     ];
@@ -63,6 +64,7 @@ class Component extends SnipeModel
         'purchase_date',
         'min_amt',
         'order_number',
+        'article_number',    /* VICONIA LINE */  
         'qty',
         'serial',
         'notes',
@@ -75,7 +77,7 @@ class Component extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'order_number', 'serial', 'purchase_cost', 'purchase_date', 'notes'];
+    protected $searchableAttributes = ['name', 'order_number', 'article_number', 'serial', 'purchase_cost', 'purchase_date', 'notes']; /* VICONIA EDIT 'article_number', */  
 
     /**
      * The relations and their attributes that should be included when searching the model.

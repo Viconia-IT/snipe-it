@@ -20,4 +20,11 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
     {
         return $user->hasAccess('assets.audit');
     }
+
+// VICONIA START
+    public function editMaintenanceArticles(User $user, Asset $asset = null)
+    {
+        return $user->hasAccess('assets.maintenance_articles');
+    }
+// VICONIA END
 }

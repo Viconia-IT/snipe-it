@@ -267,6 +267,13 @@
     {{ $component->order_number }} </div>
     @endif
 
+<!--  VICONIA START -->
+    @if ($component->article_number)
+    <div class="col-md-12" style="padding-bottom: 5px;"><strong>{{ trans('general.article_number') }}:</strong>
+    {{ $component->article_number }} </div>
+    @endif
+<!--  VICONIA END -->
+
     @if ($component->notes)
 
       <div class="col-md-12">

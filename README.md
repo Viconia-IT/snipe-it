@@ -1,3 +1,48 @@
+## Snipe-IT - Modified for Viconia
+
+This is an edited version of Snipe-it that have the additional functionality of using InvoiceID and Articles in Maintenances.
+These can be Get or Set using the API or webpage.
+To update the list of Articles edit the code in [AssetMaintenance.php](app/Models/AssetMaintenance.php) at row 100.
+
+To use the API to Set Maintenance values use PUT and add only the parameters you want to change.
+This is not mentioned in the official documentation for some reason.
+
+These are the new files added to the project:
+- [2022_11_18_140000_add_articles_to_asset_maintenances_table.php](database/migrations/2022_11_18_140000_add_articles_to_asset_maintenances_table.php)
+- [2022_11_30_140000_add_invoice_ids_to_asset_maintenances_table.php](database/migrations/2022_11_30_140000_add_invoice_ids_to_asset_maintenances_table.php)
+
+These are the edited files, you can find the changes by searching for VICONIA:
+- [view.blade.php](resources/views/asset_maintenances/view.blade.php)
+- [edit.blade.php](resources/views/asset_maintenances/edit.blade.php)
+- [asset_maintenances.blade.php](resources/views/reports/asset_maintenances.blade.php)
+- [ReportsController.php](app/Http/Controllers/ReportsController.php)
+- [AssetMaintenancesController.php](app/Http/Controllers/AssetMaintenancesController.php)
+- [AssetMaintenancesController.php](app/Http/Controllers/Api/AssetMaintenancesController.php)
+- [AssetMaintenancesTransformer.php](app/Http/Transformers/AssetMaintenancesTransformer.php)
+- [AssetMaintenance.php](app/Models/AssetMaintenance.php) - Contains the list of Articles you can change (at row 100)
+- [AssetMaintenancesPresenter.php](app/Presenters/AssetMaintenancesPresenter.php)
+- [Helper.php](app/Helpers/Helper.php)
+
+### Updating to the latest Snipe-It version
+
+To update the project you need to sync this fork with the original Snipe-it master branch then update the project on the server.
+- Click "Sync fork" then "Update" here on Github.
+- Run "php upgrade.php" command in the project folder to upgrade to the latest version.
+
+(Note: If you cloned the project using the original git branch from Snipe-IT you first need to change the Url to this branch using the command "git remote set-url origin https://github.com/Viconia-IT/snipe-it.git" in the project folder)
+
+
+### Fresh installation
+
+For development or a new installation you can follow [the official documentation](https://snipe-it.readme.io/docs/installation) except for the download section at the start.
+ - You need to cloning this project instead of the original using: "git clone https://github.com/Viconia-IT/snipe-it.git [folder]"
+ 
+ 
+### Development
+
+I used XAMPP to develop this extention which had a php webserver and a database built in.
+But it was a bit hard to debug.
+
 ![Build Status](https://app.chipperci.com/projects/0e5f8979-31eb-4ee6-9abf-050b76ab0383/status/master) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/snipe-it/localized.svg)](https://crowdin.com/project/snipe-it) [![Docker Pulls](https://img.shields.io/docker/pulls/snipe/snipe-it.svg)](https://hub.docker.com/r/snipe/snipe-it/) [![Twitter Follow](https://img.shields.io/twitter/follow/snipeitapp.svg?style=social)](https://twitter.com/snipeitapp)  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/553ce52037fc43ea99149785afcfe641)](https://www.codacy.com/app/snipe/snipe-it?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snipe/snipe-it&amp;utm_campaign=Badge_Grade)
 [![All Contributors](https://img.shields.io/badge/all_contributors-310-orange.svg?style=flat-square)](#contributors) [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/yZFtShAcKk) [![huntr](https://cdn.huntr.dev/huntr_security_badge_mono.svg)](https://huntr.dev)
 

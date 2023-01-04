@@ -123,6 +123,7 @@
         </div>
         
 <!--   VICONIA START   -->
+
         <!-- Invoice Id -->
         <div class="form-group {{ $errors->has('invoice_id') ? ' has-error' : '' }}">
           <label for="invoice_id" class="col-md-3 control-label">
@@ -134,16 +135,20 @@
           </div>
         </div>
 
+@can('editMaintenanceArticles', \App\Models\Asset::class)
         <!-- Articles + button -->
         <div class="form-group {{ $errors->has('articles') ? ' has-error' : '' }}">
             <label for="articles" class="col-md-3 control-label">Articles</label>
-            <div class="col-md-2 col-sm-12">
-                <button class="add_field_button btn btn-default btn-sm">
-                    <i class="fas fa-plus"></i>
-                </button>
+            <div class="col-md-7 col-sm-12">
+                <select id="article-select" class="js-data-ajax select2" data-endpoint="components" data-placeholder="Select article to add" aria-label="articles" name="articles" style="width: 100%">
+                    <option value="" selected="selected" role="option" aria-selected="true" role="option">
+                    </option>
+                </select>
             </div>
         </div>
+        
         <div class="input_fields_wrap"></div>
+@endcan
 <!--   VICONIA END   -->
 
 
@@ -168,9 +173,8 @@
 
         var wrapper         = $(".input_fields_wrap"); //Fields wrapper
         var add_button      = $(".add_field_button"); //Add button ID
-        var articleIndex    = 0; //Index in the array
-        var x               = 1; //initial text box count
-        var articleTypes    = <?php echo json_encode($articleTypes); ?>;
+        var articleIndex    = 1; //Index in the array
+        var x               = 0; //initial text box count
         
 
         // Those we got from the server on page load
@@ -179,12 +183,13 @@
         {
             var articles = <?php echo isset($item->articles) ? $item->articles : json_encode([]); ?>;
             articles.forEach(element => {
-                addArticleField(element);
+                let string = element.article_nr + " - " + element.component_name + " (" + element.component_id + ")";
+                addArticleField(string);
             });
 
         }
 
-        function addArticleField(defaultValue)
+        function addArticleField(value)
         {
             x++; //text box increment
 
@@ -192,15 +197,10 @@
             box_html += '<span class="fields_wrapper">';
             box_html += '<div class="form-group">';
             box_html += '<label for="articles[' + articleIndex + ']" class="col-md-3 control-label">#'+ articleIndex +'</label>'
-            box_html += '<div class="col-md-7 col-sm-12 required">';
-            
-            // Use a normal select list to choose
-            box_html += '<select type="text" class="myselect form-control" name="articles[' + articleIndex + ']">';
-            articleTypes.forEach(element => {
-                var selected = (element === defaultValue) ? "selected" : "";
-                box_html += '<option class="myselect form-control" style="min-width:350px" "aria-label"="ArticleTypes" value="' + element + '" ' + selected +' >' + element + '</option>';
-            });
-            box_html += '</select>';
+            box_html += '<div class="col-md-7 col-sm-12">';
+
+            box_html += '<input class="form-control"  name="articles[' + articleIndex + ']" value="'+ value +'" readonly />';
+        
 
             box_html += '</div>';
             box_html += '<div class="col-md-2 col-sm-12">';
@@ -215,16 +215,34 @@
 
             articleIndex++;
         }
-
-        $(add_button).click(function(e){ //on add input button click
-            e.preventDefault();
-            addArticleField("defaultValue");
-        });
         
         $(wrapper).on("click",".remove_field", function(e){ //user clicks on remove text
             e.preventDefault();
             $(this).parent('div').parent('div').parent('span').remove();
             x--;
+        });
+
+        $("#article-select").on("change", function(e) {
+
+            // Testing
+            //var elm = document.getElementById("article-select");
+            //var value = elm.value;
+            //for (let i = 0; i < elm.options.length; i++) {
+            //    const element = elm.options[i];
+            //    window.alert(i + " - " + elm.options[i].text);
+            //}
+            //window.alert(elm.options[value].text);
+
+            var elm = document.getElementById("article-select");
+            if (x < 50) addArticleField(elm.options[1].text);
+            else        window.alert("You can't add more than 50 articles");
+           
+            // Clear selected value and the options
+            // The options from the server will reload each time, and when selected, add itself as a real HTML option
+            // This real option needs to be removed so we can know which option is selected next time
+            elm.value = "";
+            elm.options[1] = null;
+
         });
 
 

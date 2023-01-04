@@ -146,6 +146,17 @@ class UserFactory extends Factory
         });
     }
 
+// VICONIA START
+    public function editMaintenanceArticles()
+    {
+        return $this->state(function () {
+            return [
+                'permissions' => '{"assets.maintenance_articles":"1"}',
+            ];
+        });
+    }
+// VICONIA END
+
     public function viewAccessories()
     {
         return $this->state(function () {

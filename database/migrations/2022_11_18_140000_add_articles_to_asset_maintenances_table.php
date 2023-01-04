@@ -14,7 +14,7 @@ class AddArticlesToAssetMaintenancesTable extends Migration
     public function up()
     {
         Schema::table('asset_maintenances', function (Blueprint $table) {
-            $table->string('articles')->nullable()->default(null);
+            $table->string('articles', 20000)->nullable()->default(null); // Increase max characters from 191 to 20000 (can safely contain 50 article objects)
         });
     }
 

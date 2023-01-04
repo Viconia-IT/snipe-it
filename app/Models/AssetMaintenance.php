@@ -86,35 +86,76 @@ class AssetMaintenance extends Model implements ICompanyableChild
         ];
     }
 
-/* VICONIA START */    
-    /**
-     * getArticleTypes
-     *
-     * @return array
-     * @version v1.0
-     */
-    public static function getArticleTypes()
-    {
-        return [
-            "vrep001 - Workhours",
-            "vrep002 - Items",
-            "vrep003 - Parts",
-        ];
-    }
+/* VICONIA START */
 
-    public static function parseArticles($articles)
+    // Takes in an array of strings
+    // Returns an array of objects containing:
+    // article_nr, component_id and component_name
+    public static function articleStringsToObjects($articles)
     {
         if ($articles == null) return null;
         
-        $articleTypes = AssetMaintenance::getArticleTypes();
-        $cleanArray = [];
+        $array = [];
         foreach ($articles as $value)
         {
-            if (in_array($value, $articleTypes)) {
-                array_push($cleanArray, $value);
-            }
+            if ($value == null || $value == "")
+                continue;
+
+            // The format of the article name is: ArticleNr - ComponentName (Component ID)
+            // We want to put them in variables
+            $temp = explode(" - ", $value);
+            $articleNr = $temp[0];
+
+            $temp2 = explode(" (", $temp[1]);
+            $componentID = $temp2[count($temp2)-1]; // get last index
+            $componentID = substr($componentID, 0, -1); // remove the ending ')'
+            $componentName = substr($temp[1], 0, -(strlen($componentID) + 3)); // remove the ending ' (Component ID)'
+
+            $obj = (object) [
+                'article_nr' => $articleNr,
+                'component_id' => $componentID,
+                'component_name' => $componentName,
+            ];
+            
+            array_push($array, $obj);
         }
-        return json_encode($cleanArray);
+        return $array; //json_encode($array);
+    }
+
+
+    // Input an array of article objects to get an array of strings like this: ArticleNr - ComponentName (Component ID)
+    public static function articleObjectsToStrings($articles)
+    {
+        if ($articles == null) return null;
+        
+        $array = [];
+        foreach ($articles as $value)
+        {
+            if ($value == null || $value == "" || !is_object($value))
+                continue;
+
+            if (!property_exists($value, "article_nr") ||
+                !property_exists($value, "component_name") || 
+                !property_exists($value, "component_id") )
+                continue;
+
+            // Make a string like this: ArticleNr - ComponentName (Component ID)
+            $string = $value->article_nr . " - " . $value->component_name . " (" . $value->component_id . ")";
+            array_push($array, $string);
+        }
+        return $array;
+    }
+
+
+    public static function parseArticles($obj)
+    {
+        return $obj ? json_decode($obj) : null;
+    }
+
+
+    public static function serializeArticles($string)
+    {
+        return $string ? json_encode($string) : null;
     }
 /* VICONIA END */ 
 

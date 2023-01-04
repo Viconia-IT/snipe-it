@@ -57,6 +57,7 @@ class ComponentsCest
             'min_amt'           => $component->min_amt,
             'name'              => $component->name,
             'order_number'      => $component->order_number,
+            'article_number'    => $component->article_number, // VICONIA LINE
             'purchase_cost'     => $component->purchase_cost,
             'purchase_date'     => '2016-01-01',
             'qty'               => $component->qty,

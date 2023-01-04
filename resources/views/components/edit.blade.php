@@ -18,6 +18,7 @@
 @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
 @include ('partials.forms.edit.order_number')
+@include ('partials.forms.edit.article_number') <!-- VICONIA LINE -->
 @include ('partials.forms.edit.purchase_date')
 @include ('partials.forms.edit.purchase_cost')
 

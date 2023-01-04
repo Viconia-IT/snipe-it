@@ -187,6 +187,7 @@ return [
     'no'  					=> 'Nej',
     'notes'  				=> 'Anteckningar',
     'order_number'          => 'Order Nummer',
+    'article_number'        => 'Artikel Nummer', // VICONIA LINE
     'only_deleted'          => 'Endast borttagna tillgångar',
     'page_menu'				=> 'Visar _MENU_ objekt',
     'pagination_info'		=> 'Visar _START_ till _END_ av _TOTAL_ objekt',

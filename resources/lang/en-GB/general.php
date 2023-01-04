@@ -187,6 +187,7 @@ return [
     'no'  					=> 'No',
     'notes'  				=> 'Notes',
     'order_number'          => 'Order Number',
+    'article_number'        => 'Article Number', // VICONIA LINE
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Showing _MENU_ items',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Components;
 
+use App\Helpers\Helper; // VICONIA LINE
 use App\Events\CheckoutableCheckedIn;
 use App\Events\ComponentCheckedIn;
 use App\Http\Controllers\Controller;
@@ -102,4 +103,51 @@ class ComponentCheckinController extends Controller
 
         return redirect()->route('components.index')->with('error', trans('admin/components/message.does_not_exist'));
     }
+
+// VICONIA START
+     /**
+     * Validate and store checkin data.
+     *
+     * @author [C. Pettersson] [Viconia]
+     */
+    public static function internal_store($component_asset_id, $checkin_qty, $note)
+    {
+        if ($component_assets = DB::table('components_assets')->find($component_asset_id)) {
+            if (is_null($component = Component::find($component_assets->component_id))) {
+                return Helper::formatStandardApiResponse('error', null, "Component not found");
+            }
+
+            // The permission check is done outside this function
+            //$context->authorize('checkin', $component);
+
+            // Check if the asset have enough components for the checkin request
+            if ($checkin_qty > $component_assets->assigned_qty) {
+                return Helper::formatStandardApiResponse('error', null, "Not enough components left in asset");
+            }
+
+            // Validation passed, so let's figure out what we have to do here.
+            $qty_remaining_in_checkout = ($component_assets->assigned_qty - (int) $checkin_qty);
+
+            // We have to modify the record to reflect the new qty that's
+            // actually checked out.
+            $component_assets->assigned_qty = $qty_remaining_in_checkout;
+            DB::table('components_assets')->where('id',
+                $component_asset_id)->update(['assigned_qty' => $qty_remaining_in_checkout]);
+
+            // If the checked-in qty is exactly the same as the assigned_qty,
+            // we can simply delete the associated components_assets record
+            if ($qty_remaining_in_checkout == 0) {
+                DB::table('components_assets')->where('id', '=', $component_asset_id)->delete();
+            }
+
+            $asset = Asset::find($component_assets->asset_id);
+
+            event(new CheckoutableCheckedIn($component, $asset, Auth::user(), $note, Carbon::now()));
+
+            return Helper::formatStandardApiResponse('success', null,  trans('admin/components/message.checkin.success'));
+        }
+
+        return Helper::formatStandardApiResponse('error', null, "Asset not found " . $component_asset_id);
+    }
+    // VICONIA END
 }
