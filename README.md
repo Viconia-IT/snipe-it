@@ -1,27 +1,20 @@
 ## Snipe-IT - Modified for Viconia
 
-This is an edited version of Snipe-it that have the additional functionality of using InvoiceID and Articles in Maintenances.
-These can be Get or Set using the API or webpage.
-To update the list of Articles edit the code in [AssetMaintenance.php](app/Models/AssetMaintenance.php) at row 100.
+This is an edited version of Snipe-it that have some additional functionality:
 
-To use the API to Set Maintenance values use PUT and add only the parameters you want to change.
-This is not mentioned in the official documentation for some reason.
+- Each Component now have an Article Number
+- Each Maintenance now have a list of Articles/Components
+- Each Maintenance now have an Invoid Id (Summera "Ärende")
+- When an Article is added or removed from a Maintenance it's automatically checked in/out
+- To modify Articles in a Maintenance you need the permission "View and Modify Articles in Maintenances"
 
-These are the new files added to the project:
-- [2022_11_18_140000_add_articles_to_asset_maintenances_table.php](database/migrations/2022_11_18_140000_add_articles_to_asset_maintenances_table.php)
-- [2022_11_30_140000_add_invoice_ids_to_asset_maintenances_table.php](database/migrations/2022_11_30_140000_add_invoice_ids_to_asset_maintenances_table.php)
 
-These are the edited files, you can find the changes by searching for VICONIA:
-- [view.blade.php](resources/views/asset_maintenances/view.blade.php)
-- [edit.blade.php](resources/views/asset_maintenances/edit.blade.php)
-- [asset_maintenances.blade.php](resources/views/reports/asset_maintenances.blade.php)
-- [ReportsController.php](app/Http/Controllers/ReportsController.php)
-- [AssetMaintenancesController.php](app/Http/Controllers/AssetMaintenancesController.php)
-- [AssetMaintenancesController.php](app/Http/Controllers/Api/AssetMaintenancesController.php)
-- [AssetMaintenancesTransformer.php](app/Http/Transformers/AssetMaintenancesTransformer.php)
-- [AssetMaintenance.php](app/Models/AssetMaintenance.php) - Contains the list of Articles you can change (at row 100)
-- [AssetMaintenancesPresenter.php](app/Presenters/AssetMaintenancesPresenter.php)
-- [Helper.php](app/Helpers/Helper.php)
+You can use GET and PUT API calls to get and set Maintenances values. When you use PUT you only need to add the parameters you want to change. Note! For now the API don't have the functionality to automatically check in/out components since we don't need it.
+```
+GET /api/v1/maintenances
+PUT /api/v1/maintenances/{id}
+```
+
 
 ### Updating to the latest Snipe-It version
 
@@ -34,8 +27,9 @@ To update the project you need to sync this fork with the original Snipe-it mast
 
 ### Fresh installation
 
-For development or a new installation you can follow [the official documentation](https://snipe-it.readme.io/docs/installation) except for the download section at the start.
- - You need to cloning this project instead of the original using: "git clone https://github.com/Viconia-IT/snipe-it.git [folder]"
+For development or a new installation with you can follow [the official documentation](https://snipe-it.readme.io/docs/installation) except for the download section at the start.
+ - You need to clone this project instead of the original using: "git clone https://github.com/Viconia-IT/snipe-it.git [folder]"
+ 
  
  
 ### Development
