@@ -48,7 +48,15 @@
                     <th data-searchable="true" data-sortable="true" data-field="cost" class="text-right" data-footer-formatter="sumFormatter">{{ trans('admin/asset_maintenances/form.cost') }}</th>
                     <th data-searchable="true" data-sortable="true" data-field="user_id" data-formatter="usersLinkObjFormatter">{{ trans('general.admin') }}</th>
                     <th data-searchable="true" data-sortable="true" data-field="notes" data-visible="false">{{ trans('admin/asset_maintenances/form.notes') }}</th>
-                    <th data-searchable="true" data-sortable="true" data-field="articles" data-visible="false">Articles</th> <!--  VICONIA LINE  -->
+<!--  VICONIA START  -->
+                    <th data-searchable="true" data-sortable="true" data-field="is_warranty" data-formatter="trueYesFormatter" data-visible="false">Warranty</th>
+@can('viewMaintenanceArticles', \App\Models\Asset::class)
+                    <th data-searchable="true" data-sortable="true" data-field="internal_notes"  data-visible="false">Internal Notes</th>
+                    <th data-searchable="true" data-sortable="true" data-field="ready_for_billing" data-formatter="trueYesFormatter" data-visible="false">Ready for Billing</th>
+                    <th data-searchable="true" data-sortable="true" data-field="invoice_id" data-visible="false">Invoice Id</th>
+                    <th data-searchable="true" data-sortable="true" data-field="articles" data-formatter="articleNameLinkFormatter" data-visible="false">Articles</th>
+@endcan
+<!--  VICONIA END  -->
                 </tr>
                 </thead>
             </table>

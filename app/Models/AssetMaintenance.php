@@ -35,7 +35,9 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'completion_date'        => 'nullable|date',
         'notes'                  => 'string|nullable',
         'cost'                   => 'numeric|nullable',
-/* VICONIA START */   
+/* VICONIA START */
+        'internal_notes'         => 'string|nullable',
+        'ready_for_billing'      => 'boolean', 
         'invoice_id'             => 'string|nullable',
         'articles'               => 'string|nullable', 
 /* VICONIA END */  
@@ -103,7 +105,10 @@ class AssetMaintenance extends Model implements ICompanyableChild
 
             // The format of the article name is: ArticleNr - ComponentName (Component ID)
             // We want to put them in variables
-            $temp = explode(" - ", $value);
+            $temp = explode(" - ", $value, 2);
+            if (count($temp) != 2)
+                continue;
+
             $articleNr = $temp[0];
 
             $temp2 = explode(" (", $temp[1]);

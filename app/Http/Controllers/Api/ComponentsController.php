@@ -339,7 +339,7 @@ class ComponentsController extends Controller
             'name',
             'image',
             'article_number',
-        ]);
+        ])->where('components.article_number', '<>', '');
 
         if ($request->filled('search')) {
             $components = $components->where('components.name', 'LIKE', '%'.$request->get('search').'%')

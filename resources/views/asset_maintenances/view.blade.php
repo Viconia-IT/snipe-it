@@ -99,22 +99,40 @@ use Carbon\Carbon;
       <!-- 5th Row End -->
 
 <!--   VICONIA START   -->
+@can('editMaintenanceArticles', \App\Models\Asset::class)
       <!-- 6th Row Begin -->
       <div class="row">
         <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
-          <strong>Invoice Id: </strong>
-          {{ $assetMaintenance->invoice_id }}
+          <strong>Internal Notes: </strong>
+          {{ $assetMaintenance->internal_notes }}
         </div>
       </div>
       <!-- 6th Row End -->
       <!-- 7th Row Begin -->
       <div class="row">
         <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
+          <strong>Ready for Billing: </strong>
+          {{ $assetMaintenance->ready_for_billing ? "Yes" : "No" }}
+        </div>
+      </div>
+      <!-- 7th Row End -->
+      <!-- 8th Row Begin -->
+      <div class="row">
+        <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
+          <strong>Invoice Id: </strong>
+          {{ $assetMaintenance->invoice_id }}
+        </div>
+      </div>
+      <!-- 8th Row End -->
+      <!-- 9th Row Begin -->
+      <div class="row">
+        <div class="col-md-3 col-sm-3" style="padding-bottom: 10px; margin-left: 15px; word-wrap: break-word;">
           <strong>Articles: </strong>
           {{ Helper::formatArticlesOutput($assetMaintenance->articles) }}
         </div>
       </div>
-      <!-- 7th Row End -->
+      <!-- 9th Row End -->
+@endcan
 <!--   VICONIA END   -->
 
     </div> <!-- col-md-9 bio end -->

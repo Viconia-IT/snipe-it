@@ -6,9 +6,6 @@ use App\Helpers\Helper;
 use App\Models\Asset;
 use App\Models\AssetMaintenance;
 use App\Models\Company;
-use App\Models\Component; // VICONIA LINE
-use App\Http\Controllers\Components\ComponentCheckoutController; // VICONIA LINE
-use App\Http\Controllers\Components\ComponentCheckinController; // VICONIA LINE
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -89,169 +86,6 @@ class AssetMaintenancesController extends Controller
     }
 
 
-// VICONIA START
-    // Used to check out or in components when adding or removing articles on a maintenance
-    public function CheckInOutComponents($asset_id, $newSet = [], $oldSet = [], & $returnArray = [])
-    {
-        $newSet = $newSet ? $newSet : [];
-        $oldSet = $oldSet ? $oldSet : [];
-
-        $newUnique = array_unique($newSet, SORT_REGULAR);
-        $oldUnique = []; //array_unique($oldSet, SORT_REGULAR); Not working since all have different component_asset_id
-
-        // Find objects with unique component_id
-        foreach ($oldSet as $obj)
-        {
-            $isUnique = true;
-            foreach ($oldUnique as $i)
-            {
-                if ($obj->component_id == $i->component_id) // If the same object values
-                {
-                    $isUnique = false;
-                    break;
-                }
-            }
-
-            if ($isUnique)
-                array_push($oldUnique, $obj); // Add unique object
-        }
-
-
-        // Find how many of each component are in the NEW set
-        foreach ($newUnique as $obj)
-        {
-            $obj->count = 0;
-            foreach ($newSet as $i)
-            {
-                if ($obj->component_id == $i->component_id) // If the same object values
-                {
-                    $obj->count++;
-                }
-            }
-        }
-
-        // Find how many of each component are in the OLD set
-        foreach ($oldUnique as $obj)
-        {
-            $obj->count = 0;
-            $obj->db_refs = [];
-            foreach ($oldSet as $i)
-            {
-                if ($obj->component_id == $i->component_id) // If the same object values
-                {
-                    $obj->count++;
-                    array_push($obj->db_refs, $i->component_asset_id); // Save the database refs
-                }
-            }
-        }
-
-
-        // Find how many old we need to remove
-        foreach ($oldUnique as $old)
-        {
-            $old->to_remove = $old->count;
-            foreach ($newUnique as $new)
-            {
-                if ($old->component_id == $new->component_id)
-                {
-                    $old->to_remove = $old->count - $new->count;
-                    break;
-                }
-            }
-        }
-
-        // Find how many new we need to add
-        foreach ($newUnique as $new)
-        {
-            $new->to_add = $new->count;
-            foreach ($oldUnique as $old)
-            {
-                if ($old->component_id == $new->component_id)
-                {
-                    $new->to_add = $new->count - $old->count;
-                    break;
-                }
-            }
-        }
-
-
-        // First we make sure we can check in all our components in the article objects
-        foreach ($newUnique as $obj)
-        {
-            $add_count = $obj->to_add;
-
-            // Then make sure the component have enough quantity
-            if (is_null($component = Component::find($obj->component_id))) {
-                return Helper::formatStandardApiResponse('error', null, "Component doesn't exist");
-            }
-    
-            if ($add_count > $component->numRemaining()) {
-                $msg = "Not enough components (articles) left for " . $obj->component_name . " (" . $obj->component_id . "). Desired quantity: " . $add_count . " Remaining quantity: " . $component->numRemaining();
-                return Helper::formatStandardApiResponse('error', null, $msg);
-            }
-        }
-
-
-        // We are now sure we have enough component quantity
-        // Now we can check out all components
-        foreach ($newUnique as $obj)
-        {
-            for ($i=0; $i < $obj->to_add; $i++)
-            { 
-                $result = ComponentCheckoutController::internal_store($obj->component_id, $asset_id, 1, "Automatic from maintenance article");
-                if ($result["status"] == "error") {
-                    return Helper::formatStandardApiResponse('error', null, $obj->component_name . " (" . $obj->component_id . ") - " . $result["messages"]);
-                }
-
-                // Add the new object to the return array
-                $newObj = new \stdClass();
-                $newObj->article_nr = $obj->article_nr;
-                $newObj->component_id = $obj->component_id;
-                $newObj->component_name = $obj->component_name;
-                $newObj->component_asset_id = $result["payload"];
-                array_push($returnArray, $newObj);
-            }
-        }
-
-        // Check in removed components and keep the others
-        foreach ($oldUnique as $obj)
-        {
-            for ($i=0; $i < $obj->count; $i++)
-            {
-                // First get a unique component_asset_id
-                $component_asset_id = array_pop($obj->db_refs);
-                if ($component_asset_id == null)    continue;
-                
-                
-                if ($obj->to_remove > 0)
-                {
-                    $obj->to_remove--;
-
-                    // Ignore errors
-                    // if component already have been manually checked in this function will return an error, but it's ok to continue
-                    $result = ComponentCheckinController::internal_store($component_asset_id, 1, "Automatic from maintenance article");
-                    /*if ($result["status"] == "error") {
-                        return Helper::formatStandardApiResponse('error', null, $obj->component_name . " (" . $obj->component_id . ") - " . $result["messages"]);
-                    }*/
-                }
-                else
-                {
-                    // Add the old object to the return array
-                    $oldObj = new \stdClass();
-                    $oldObj->article_nr = $obj->article_nr;
-                    $oldObj->component_id = $obj->component_id;
-                    $oldObj->component_name = $obj->component_name;
-                    $oldObj->component_asset_id = $component_asset_id;
-                    array_push($returnArray, $oldObj);
-                }
-
-            }            
-        }
-
-        return Helper::formatStandardApiResponse('success', null, "Successfully checked in and out all components");
-    }
-// VICONIA END
-
 
     /**
     *  Validates and stores the new asset maintenance
@@ -272,18 +106,21 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->cost = Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = $request->input('notes');
 /* VICONIA START */
-        $assetMaintenance->invoice_id = $request->input('invoice_id');
 
         // If user can edit articles in a maintenance
         if (Auth::user()->hasAccess('assets.maintenance_articles')) //(Asset::editMaintenanceArticles(Auth::user()))
         {
+            $assetMaintenance->internal_notes =     $request->input('internal_notes');
+            $assetMaintenance->ready_for_billing =  $request->input('ready_for_billing') ? 1 : 0; ;
+            $assetMaintenance->invoice_id =         $request->input('invoice_id');
+
             // Convert the received array of strings to objects with property {article_nr, component_name, component_id}
             $articleObjs = AssetMaintenance::articleStringsToObjects($request->input('articles'));
 
             // Check out all components that we added articles from. This stores an aditional property in our object {component_asset_id}
             // This is a reference we can use to check in the component again later
             $articleObjsToStore = [];
-            $result = $this->CheckInOutComponents($request->input('asset_id'), $articleObjs, [], $articleObjsToStore);
+            $result = Helper::CheckInOutComponents($request->input('asset_id'), $articleObjs, [], $articleObjsToStore);
             if ($result["status"] == "error") {
                 return redirect()->back()
                                 ->withInput()
@@ -365,6 +202,8 @@ class AssetMaintenancesController extends Controller
             $assetMaintenance->cost = null;
         }
 
+        Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
+
         // Prepare Improvement Type List
         $assetMaintenanceType = [
                                     '' => 'Select an improvement type',
@@ -407,9 +246,17 @@ class AssetMaintenancesController extends Controller
             return static::getInsufficientPermissionsRedirect();
         }
 
+        /*return redirect()->back()
+        ->withInput()
+        ->with('error', $request->input('is_warranty'));*/
+
         // If user can edit articles in a maintenance
         if (Auth::user()->hasAccess('assets.maintenance_articles')) //(Asset::editMaintenanceArticles(Auth::user()))
         {
+            $assetMaintenance->internal_notes =     $request->input('internal_notes');
+            $assetMaintenance->ready_for_billing =  $request->input('ready_for_billing') ? 1 : 0;
+            $assetMaintenance->invoice_id =         $request->input('invoice_id');
+
             // Convert the received array of strings to objects with property {article_nr, component_name, component_id}
             $newObjs = AssetMaintenance::articleStringsToObjects($request->input('articles'));
             $oldObjs = AssetMaintenance::parseArticles($assetMaintenance->articles);
@@ -420,7 +267,7 @@ class AssetMaintenancesController extends Controller
 
             //    -----  If same asset  ------   //
             if ($newAssetId == $oldAssetId) {
-                $result = $this->CheckInOutComponents($newAssetId, $newObjs, $oldObjs, $articleObjsToStore);
+                $result = Helper::CheckInOutComponents($newAssetId, $newObjs, $oldObjs, $articleObjsToStore);
                 if ($result["status"] == "error") {
                     return redirect()->back()
                                         ->withInput()
@@ -430,10 +277,10 @@ class AssetMaintenancesController extends Controller
             //   -----  If asset changed  ------   //
             else {
                 // Remove components on the current asset
-                $result = $this->CheckInOutComponents($assetMaintenance->asset_id, [],  $oldObjs);
+                $result = Helper::CheckInOutComponents($assetMaintenance->asset_id, [],  $oldObjs);
 
                 // Add all components to the new asset
-                $result = $this->CheckInOutComponents($request->input('asset_id'), $newObjs, [], $articleObjsToStore);
+                $result = Helper::CheckInOutComponents($request->input('asset_id'), $newObjs, [], $articleObjsToStore);
                 if ($result["status"] == "error") {
                     return redirect()->back()
                                     ->withInput()
@@ -449,7 +296,6 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->is_warranty = $request->input('is_warranty');
         $assetMaintenance->cost =  Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = $request->input('notes');
-        $assetMaintenance->invoice_id = $request->input('invoice_id');
         
 /* VICONIA END */
 
@@ -514,7 +360,7 @@ class AssetMaintenancesController extends Controller
 
         // Checkin all components/articles we have
         $articleObjs = AssetMaintenance::parseArticles($assetMaintenance->articles); 
-        $result = $this->CheckInOutComponents($assetMaintenance->asset_id, [], $articleObjs);
+        $result = Helper::CheckInOutComponents($assetMaintenance->asset_id, [], $articleObjs);
         if ($result["status"] == "error") {
             return redirect()->route('maintenances.index')
                              ->with('error', $result["messages"]);
@@ -551,6 +397,8 @@ class AssetMaintenancesController extends Controller
         } elseif (! Company::isCurrentUserHasAccess($assetMaintenance->asset)) {
             return static::getInsufficientPermissionsRedirect();
         }
+
+        Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
 
         return view('asset_maintenances/view')->with('assetMaintenance', $assetMaintenance);
     }

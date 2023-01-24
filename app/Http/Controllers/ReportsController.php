@@ -14,6 +14,7 @@ use App\Models\License;
 use App\Models\Setting;
 use App\Notifications\CheckoutAssetNotification;
 use Carbon\Carbon;
+use Auth; // VICONIA LINE
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -935,6 +936,8 @@ class ReportsController extends Controller
             trans('admin/asset_maintenances/form.asset_maintenance_time'),
             trans('admin/asset_maintenances/form.cost'),
 /* VICONIA START */
+            "internal_notes",
+            "ready_for_billing",
             "invoice_id",
             "articles",
 /* VICONIA END */
@@ -961,8 +964,13 @@ class ReportsController extends Controller
             $row[]  = $improvementTime;
             $row[]  = trans('general.currency') . Helper::formatCurrencyOutput($assetMaintenance->cost);
 /* VICONIA START */
-            $row[] = e($assetMaintenance->invoice_id);
-            $row[] = e($assetMaintenance->articles);
+            if (Auth::user()->hasAccess('assets.maintenance_articles_read'))
+            {
+                $row[] = e($assetMaintenance->internal_notes);
+                $row[] = e($assetMaintenance->ready_for_billing);
+                $row[] = e($assetMaintenance->invoice_id);
+                $row[] = e($assetMaintenance->articles);
+            }
 /* VICONIA END */
             $rows[] = implode(',', $row);
         }

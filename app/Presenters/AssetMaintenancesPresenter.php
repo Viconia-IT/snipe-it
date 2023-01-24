@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Presenters;
+use Auth; // VICONIA LINE
 
 /**
  * Class AssetModelPresenter
@@ -95,6 +96,7 @@ class AssetMaintenancesPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/asset_maintenances/table.is_warranty'),
+                'formatter' => 'trueYesFormatter', // VICONIA LINE
             ], [
                 'field' => 'cost',
                 'searchable' => true,
@@ -102,18 +104,40 @@ class AssetMaintenancesPresenter extends Presenter
                 'title' => trans('admin/asset_maintenances/form.cost'),
                 'class' => 'text-right',
 /* VICONIA START */
-            ], [
-                'field' => 'invoice_id',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => 'Invoice Id',
-            ], [
-                'field' => 'articles',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => 'Articles',
-/* VICONIA END */
-            ], [
+            ]
+        ];
+
+        if (Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            array_push($layout, 
+                [
+                    'field' => 'internal_notes',
+                    'searchable' => true,
+                    'sortable' => true,
+                    'title' => 'Internal Notes',
+                ], [
+                    'field' => 'ready_for_billing',
+                    'searchable' => true,
+                    'sortable' => true,
+                    'title' => 'Ready for Billing',
+                    'formatter' => 'trueYesFormatter',
+                ], [
+                    'field' => 'invoice_id',
+                    'searchable' => true,
+                    'sortable' => true,
+                    'title' => 'Invoice Id',
+                ], [
+                    'field' => 'articles',
+                    'searchable' => true,
+                    'sortable' => true,
+                    'title' => 'Articles',
+                    'formatter' => 'articleNameLinkFormatter',
+                ]
+            );
+        }
+        
+        array_push($layout, 
+            [
                 'field' => 'user_id',
                 'searchable' => true,
                 'sortable' => true,
@@ -127,8 +151,9 @@ class AssetMaintenancesPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'maintenancesActionsFormatter',
-            ],
-        ];
+            ]
+        );
+/* VICONIA END */
 
         return json_encode($layout);
     }

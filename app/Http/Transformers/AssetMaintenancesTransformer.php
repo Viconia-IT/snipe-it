@@ -5,6 +5,7 @@ namespace App\Http\Transformers;
 use App\Helpers\Helper;
 use App\Models\Asset;
 use App\Models\AssetMaintenance;
+use Auth; // VICONIA LINE
 use Gate;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -56,10 +57,18 @@ class AssetMaintenancesTransformer
             'created_at' => Helper::getFormattedDateObject($assetmaintenance->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($assetmaintenance->updated_at, 'datetime'),
 // VICONIA START
-            'invoice_id'         => ($assetmaintenance->invoice_id) ? e($assetmaintenance->invoice_id) : null,
-            'articles'          => Helper::formatArticlesOutput($assetmaintenance->articles),
-// VICONIA END
+            'is_warranty'         => $assetmaintenance->is_warranty,
         ];
+
+        // Only add our variables if the user has access
+        if (Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            $array['internal_notes']       = ($assetmaintenance->internal_notes) ? e($assetmaintenance->internal_notes) : null;
+            $array['ready_for_billing']   = $assetmaintenance->ready_for_billing;
+            $array['invoice_id']         = ($assetmaintenance->invoice_id) ? e($assetmaintenance->invoice_id) : null;
+            $array['articles']         = AssetMaintenance::parseArticles($assetmaintenance->articles);
+        }
+// VICONIA END
 
         $permissions_array['available_actions'] = [
             'update' => Gate::allows('update', Asset::class),

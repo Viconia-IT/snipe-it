@@ -123,6 +123,28 @@
         </div>
         
 <!--   VICONIA START   -->
+@can('editMaintenanceArticles', \App\Models\Asset::class)
+        <hr style="border-top: 1px solid rgba(0,0,0, 0.1);">   
+
+        <!-- Internal Notes -->
+        <div class="form-group {{ $errors->has('internal_notes') ? ' has-error' : '' }}">
+          <label for="internal_notes" class="col-md-3 control-label">Internal Notes</label>
+          <div class="col-md-7">
+            <textarea class="col-md-6 form-control" id="internal_notes" name="internal_notes">{{ old('internal_notes', $item->internal_notes) }}</textarea>
+            {!! $errors->first('internal_notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+          </div>
+        </div>
+
+        <!-- Ready for Billing -->
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" value="1" name="ready_for_billing" id="ready_for_billing" {{ Request::old('ready_for_billing', $item->ready_for_billing) == '1' ? ' checked="checked"' : '' }} class="minimal"> Ready for Billing
+              </label>
+            </div>
+          </div>
+        </div>
 
         <!-- Invoice Id -->
         <div class="form-group {{ $errors->has('invoice_id') ? ' has-error' : '' }}">
@@ -130,12 +152,11 @@
             Invoice Id
           </label>
           <div class="col-md-7{{  (Helper::checkIfRequired($item, 'invoice_id')) ? ' required' : '' }}">
-            <input class="form-control" type="text" name="invoice_id" id="invoice_id" value="{{ old('invoice_id', $item->invoice_id) }}" />
+            <input class="form-control" type="text" name="invoice_id" id="invoice_id" placeholder="After the maintenance is exported for billing this should reference the invoice/ticket" value="{{ old('invoice_id', $item->invoice_id) }}" />
             {!! $errors->first('invoice_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>
 
-@can('editMaintenanceArticles', \App\Models\Asset::class)
         <!-- Articles + button -->
         <div class="form-group {{ $errors->has('articles') ? ' has-error' : '' }}">
             <label for="articles" class="col-md-3 control-label">Articles</label>

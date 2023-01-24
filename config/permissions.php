@@ -108,8 +108,14 @@ return [
 
 // VICONIA START
         [
+            'permission' => 'assets.maintenance_articles_read',
+            'label'      => 'Maintenances: View -Articles, Internal notes and Invoice id',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
             'permission' => 'assets.maintenance_articles',
-            'label'      => 'View and Modify Articles in Maintenances',
+            'label'      => 'Maintenances: Edit - Articles, Internal notes and Invoice id',
             'note'       => '',
             'display'    => true,
         ],

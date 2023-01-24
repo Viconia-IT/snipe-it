@@ -568,6 +568,30 @@
 
     }
 
+// VICONIA START
+    function articleNameLinkFormatter(value, row) {
+        if ((row.asset) && (row.articles)) {
+
+            var html = '';
+            row.articles.forEach(function(item, index) {
+                html += '<a href="{{ url('/') }}/components/' + item.component_id + '">' + item.article_nr + " - " + item.component_name + '</a>';
+                if (index != row.articles.length-1)
+                    html += ', ';
+            });
+
+            return html;            
+        }
+
+    }
+
+    function trueYesFormatter(value) {
+        if ((value) && ((value == 'true') || (value == '1'))) {
+            return 'Yes';
+        }
+    }
+
+// VICONIA END
+
     function trueFalseFormatter(value) {
         if ((value) && ((value == 'true') || (value == '1'))) {
             return '<i class="fas fa-check text-success"></i>';

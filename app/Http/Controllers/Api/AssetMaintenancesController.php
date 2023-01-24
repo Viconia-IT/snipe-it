@@ -55,9 +55,19 @@ class AssetMaintenancesController extends Controller
         }
 
 /* VICONIA START */
-        if ($request->filled('articles')) {
-            $maintenances->where('articles', '=', $request->input('articles'));
+
+        // If user want specific search terms
+        if (Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            if ($request->filled('ready_for_billing')) {
+                $maintenances->where('ready_for_billing', '=', $request->input('ready_for_billing'));
+            }
+
+            if ($request->filled('invoice_id')) {
+                $maintenances->where('invoice_id', '=', $request->input('invoice_id'));
+            }
         }
+
 /* VICONIA END */
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
@@ -80,11 +90,18 @@ class AssetMaintenancesController extends Controller
                                 'asset_name',
                                 'user_id',
                                 'supplier',
-/* VICONIA START */
-                                'invoice_id',
-                                'articles'
- /* VICONIA END */
                             ];
+/* VICONIA START */
+        if (Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            array_push($allowed_columns,
+                'internal_notes',
+                'ready_for_billing',
+                'invoice_id',
+                'articles');
+        }
+ /* VICONIA END */
+
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
 
@@ -133,8 +150,14 @@ class AssetMaintenancesController extends Controller
         $assetMaintenance->cost =  Helper::ParseCurrency($request->input('cost'));
         $assetMaintenance->notes = e($request->input('notes'));
 /* VICONIA START */
-        $assetMaintenance->invoice_id = $request->input('invoice_id');   
-        $assetMaintenance->articles = $request->input('articles'); 
+        if (Auth::user()->hasAccess('assets.maintenance_articles'))
+        {
+            $assetMaintenance->internal_notes = $request->input('internal_notes');   
+            $assetMaintenance->ready_for_billing = $request->input('ready_for_billing') ? 1 : 0; 
+            $assetMaintenance->invoice_id = $request->input('invoice_id');   
+            $assetMaintenance->articles = $request->input('articles'); 
+        }
+        
 /* VICONIA END */
         $asset = Asset::find(e($request->input('asset_id')));
 
@@ -214,8 +237,16 @@ class AssetMaintenancesController extends Controller
 
         if ($request->exists('cost'))               $assetMaintenance->cost = Helper::ParseCurrency($request->input('cost'));
         if ($request->exists('notes'))              $assetMaintenance->notes = $request->Input('notes');
-        if ($request->exists('invoice_id'))         $assetMaintenance->invoice_id = $request->Input('invoice_id');
-        if ($request->exists('articles'))           $assetMaintenance->articles = $request->input('articles');
+
+
+        if (Auth::user()->hasAccess('assets.maintenance_articles'))
+        {
+            if ($request->exists('internal_notes'))     $assetMaintenance->internal_notes = $request->Input('internal_notes');
+            if ($request->exists('ready_for_billing'))  $assetMaintenance->ready_for_billing = $request->input('ready_for_billing') ? 1 : 0;
+            if ($request->exists('invoice_id'))         $assetMaintenance->invoice_id = $request->Input('invoice_id');
+            if ($request->exists('articles'))           $assetMaintenance->articles = $request->input('articles');
+        }
+
 /* VICONIA END */
 
 
@@ -239,10 +270,12 @@ class AssetMaintenancesController extends Controller
 
         // Was the asset maintenance created?
         if ($assetMaintenance->save()) {
+            Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
             return response()->json(Helper::formatStandardApiResponse('success', $assetMaintenance, trans('admin/asset_maintenances/message.edit.success')));
 
         }
 
+        Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetMaintenance->getErrors()));
     }
 
@@ -267,6 +300,7 @@ class AssetMaintenancesController extends Controller
 
         $assetMaintenance->delete();
 
+        Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
         return response()->json(Helper::formatStandardApiResponse('success', $assetMaintenance, trans('admin/asset_maintenances/message.delete.success')));
 
 
@@ -289,6 +323,7 @@ class AssetMaintenancesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot view a maintenance for that asset'));
         }
 
+        Helper::removeUnauthorizedMaintenanceData($assetMaintenance); // VICONIA LINE
         return (new AssetMaintenancesTransformer())->transformAssetMaintenance($assetMaintenance);
 
     }

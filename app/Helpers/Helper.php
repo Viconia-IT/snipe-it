@@ -1,7 +1,12 @@
 <?php
 
 namespace App\Helpers;
-use App\Models\AssetMaintenance; // VICONIA LINE
+// VICONIA START
+use Auth;
+use App\Http\Controllers\Components\ComponentCheckoutController; 
+use App\Http\Controllers\Components\ComponentCheckinController;
+use App\Models\AssetMaintenance;
+// VICONIA END
 use App\Models\Accessory;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -58,6 +63,198 @@ class Helper
 
 
 // VICONIA START
+
+    // Used to not send data the user aren't allowed to see
+    public static function removeUnauthorizedMaintenanceDataArray($assetMaintenances)
+    {
+        if (!Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            $array = (array)$assetMaintenances;
+            for ($i=0; $i < count($array); $i++) { 
+                unset($array[$i]->internal_notes);
+                unset($array[$i]->ready_for_billing);
+                unset($array[$i]->invoice_id);
+                unset($array[$i]->articles);
+            }
+            $assetMaintenances = (object)$array;
+        }
+    }
+
+    // Used to not send data the user aren't allowed to see
+    public static function removeUnauthorizedMaintenanceData($assetMaintenance)
+    {
+        if (!Auth::user()->hasAccess('assets.maintenance_articles_read'))
+        {
+            unset($assetMaintenance->internal_notes);
+            unset($assetMaintenance->ready_for_billing);
+            unset($assetMaintenance->invoice_id);
+            unset($assetMaintenance->articles);
+        }
+    }
+
+
+    // Used to automatically check out or in components when adding or removing articles on a maintenance
+    public static function CheckInOutComponents($asset_id, $newSet = [], $oldSet = [], & $returnArray = [])
+    {
+        $newSet = $newSet ? $newSet : [];
+        $oldSet = $oldSet ? $oldSet : [];
+
+        $newUnique = array_unique($newSet, SORT_REGULAR);
+        $oldUnique = []; //array_unique($oldSet, SORT_REGULAR); Not working since all have different component_asset_id
+
+        // Find objects with unique component_id
+        foreach ($oldSet as $obj)
+        {
+            $isUnique = true;
+            foreach ($oldUnique as $i)
+            {
+                if ($obj->component_id == $i->component_id) // If the same object values
+                {
+                    $isUnique = false;
+                    break;
+                }
+            }
+
+            if ($isUnique)
+                array_push($oldUnique, $obj); // Add unique object
+        }
+
+
+        // Find how many of each component are in the NEW set
+        foreach ($newUnique as $obj)
+        {
+            $obj->count = 0;
+            foreach ($newSet as $i)
+            {
+                if ($obj->component_id == $i->component_id) // If the same object values
+                {
+                    $obj->count++;
+                }
+            }
+        }
+
+        // Find how many of each component are in the OLD set
+        foreach ($oldUnique as $obj)
+        {
+            $obj->count = 0;
+            $obj->db_refs = [];
+            foreach ($oldSet as $i)
+            {
+                if ($obj->component_id == $i->component_id) // If the same object values
+                {
+                    $obj->count++;
+                    array_push($obj->db_refs, $i->component_asset_id); // Save the database refs
+                }
+            }
+        }
+
+
+        // Find how many old we need to remove
+        foreach ($oldUnique as $old)
+        {
+            $old->to_remove = $old->count;
+            foreach ($newUnique as $new)
+            {
+                if ($old->component_id == $new->component_id)
+                {
+                    $old->to_remove = $old->count - $new->count;
+                    break;
+                }
+            }
+        }
+
+        // Find how many new we need to add
+        foreach ($newUnique as $new)
+        {
+            $new->to_add = $new->count;
+            foreach ($oldUnique as $old)
+            {
+                if ($old->component_id == $new->component_id)
+                {
+                    $new->to_add = $new->count - $old->count;
+                    break;
+                }
+            }
+        }
+
+
+        // First we make sure we can check in all our components in the article objects
+        foreach ($newUnique as $obj)
+        {
+            $add_count = $obj->to_add;
+
+            // Then make sure the component have enough quantity
+            if (is_null($component = Component::find($obj->component_id))) {
+                return Helper::formatStandardApiResponse('error', null, "Component doesn't exist");
+            }
+    
+            if ($add_count > $component->numRemaining()) {
+                $msg = "Not enough components (articles) left for " . $obj->component_name . " (" . $obj->component_id . "). Desired quantity: " . $add_count . " Remaining quantity: " . $component->numRemaining();
+                return Helper::formatStandardApiResponse('error', null, $msg);
+            }
+        }
+
+
+        // We are now sure we have enough component quantity
+        // Now we can check out all components
+        foreach ($newUnique as $obj)
+        {
+            for ($i=0; $i < $obj->to_add; $i++)
+            { 
+                $result = ComponentCheckoutController::internal_store($obj->component_id, $asset_id, 1, "Automatic from maintenance article");
+                if ($result["status"] == "error") {
+                    return Helper::formatStandardApiResponse('error', null, $obj->component_name . " (" . $obj->component_id . ") - " . $result["messages"]);
+                }
+
+                // Add the new object to the return array
+                $newObj = new \stdClass();
+                $newObj->article_nr = $obj->article_nr;
+                $newObj->component_id = $obj->component_id;
+                $newObj->component_name = $obj->component_name;
+                $newObj->component_asset_id = $result["payload"];
+                array_push($returnArray, $newObj);
+            }
+        }
+
+        // Check in removed components and keep the others
+        foreach ($oldUnique as $obj)
+        {
+            for ($i=0; $i < $obj->count; $i++)
+            {
+                // First get a unique component_asset_id
+                $component_asset_id = array_pop($obj->db_refs);
+                if ($component_asset_id == null)    continue;
+                
+                
+                if ($obj->to_remove > 0)
+                {
+                    $obj->to_remove--;
+
+                    // Ignore errors
+                    // if component already have been manually checked in this function will return an error, but it's ok to continue
+                    $result = ComponentCheckinController::internal_store($component_asset_id, 1, "Automatic from maintenance article");
+                    /*if ($result["status"] == "error") {
+                        return Helper::formatStandardApiResponse('error', null, $obj->component_name . " (" . $obj->component_id . ") - " . $result["messages"]);
+                    }*/
+                }
+                else
+                {
+                    // Add the old object to the return array
+                    $oldObj = new \stdClass();
+                    $oldObj->article_nr = $obj->article_nr;
+                    $oldObj->component_id = $obj->component_id;
+                    $oldObj->component_name = $obj->component_name;
+                    $oldObj->component_asset_id = $component_asset_id;
+                    array_push($returnArray, $oldObj);
+                }
+
+            }            
+        }
+
+        return Helper::formatStandardApiResponse('success', null, "Successfully checked in and out all components");
+    }
+
+
     /**
      *
      * @author [Carl Pettersson] [carl.pettersson@viconia.se]
