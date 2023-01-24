@@ -3,13 +3,12 @@
 This is an edited version of Snipe-it that have some additional functionality:
 
 - Each Component now have an Article Number
-- Each Maintenance now have a list of Articles/Components
-- Each Maintenance now have an Invoid Id (Summera "Ärende")
+- Each Maintenance now have an Invoid Id ("Ärende" ref), A list of Articles(Components), a Ready for billing option and Internal notes
 - When an Article is added or removed from a Maintenance it's automatically checked in/out
-- To modify Articles in a Maintenance you need the permission "View and Modify Articles in Maintenances"
+- To read/write the new options in a Maintenance you need to set the permissions for your user or group
 
 
-You can use GET and PUT API calls to get and set Maintenances values. When you use PUT you only need to add the parameters you want to change. Note! For now the API don't have the functionality to automatically check in/out components since we don't need it.
+You can use GET and PUT API calls to get and set Maintenances values. When you use PUT you only need to add the parameters you want to change. Note! For now the API don't have the functionality to automatically check in/out components.
 ```
 GET /api/v1/maintenances
 PUT /api/v1/maintenances/{id}
