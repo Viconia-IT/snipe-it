@@ -3,7 +3,7 @@
 This is an edited version of Snipe-it that have some additional functionality:
 
 - Each Component now have an Article Number
-- Each Maintenance now have an Invoid Id ("Ärende" ref), A list of Articles(Components), a Ready for billing option and Internal notes
+- Each Maintenance now have an Invoice Id ("Ärende" ref), A list of Articles(Components), a Ready for billing option and Internal notes
 - When an Article is added or removed from a Maintenance it's automatically checked in/out
 - To read/write the new options in a Maintenance you need to set the permissions for your user or group
 
